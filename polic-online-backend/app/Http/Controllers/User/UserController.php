@@ -1,16 +1,20 @@
 <?php
-
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 USE App\Models\User;
 
 class UserController extends Controller {
 
-    public function signup(Request $req)
-    {
+    /**
+     * Signup method
+     * @param Request $req
+     * @return string JSON return
+     */
+    public function signup(Request $req): string{
         try {
             // Validate the request data
             $validator = Validator::make($req->all(), [
@@ -50,8 +54,7 @@ class UserController extends Controller {
                 'status' => 'success',
                 'msg' => 'Пользователь успешно зарегистрирован!',
                 'usr' => $user,
-            ], 201);
-    
+            ], 201)->getContent();
         } catch (\Exception $e) {
             // Handle exceptions
             return response()->json([
@@ -61,6 +64,69 @@ class UserController extends Controller {
             ], 500);
         }
     }
-    
+    /**
+     * login method
+     * @param Request $req
+     * @return string JSON return
+     */
+    public function login(Request $req): string{
+        try {
+            // Validate incoming request
+            $validator = Validator::make($req->all(), [
+                'email' => 'required|email',
+                'password' => 'required|string|min:6',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'msg' => 'Ошибка проверки данных.',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            // Attempt to authenticate the user
+            if (!Auth::attempt($req->only('email', 'password'))) {
+                return response()->json([
+                    'status' => 'error',
+                    'msg' => 'Неверные учетные данные.',
+                ], 401); // Unauthorized
+            }
+
+            // Get the authenticated user
+            $user = Auth::user();
+
+            // Generate a token for the user
+            $token = $req->user()->createToken('API Token');
+
+
+
+            // Return success response
+            return response()->json([
+                'status' => 'success',
+                'msg' => 'Успешный вход!',
+                'token' => $token,
+                'user' => $user,
+            ], 200)->getContent();
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'msg' => 'Произошла ошибка при обработке вашего запроса.',
+                'error' => $e->getMessage(), // For debugging
+            ], 500); // Internal Server Error
+        }
+    }
+    /**
+     * User: to get the current user using a token
+     * @param Request $req
+     * @return string JSON return
+    */    
+    public function user(){
+        $user = Auth::user();
+        return response()->json([
+            'status' => 'success',
+            'user' => $user
+        ], 200);
+    }
 
 }
