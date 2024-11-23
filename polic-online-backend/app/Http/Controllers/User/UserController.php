@@ -18,7 +18,7 @@ class UserController extends Controller {
         try {
             // Validate the request data
             $validator = Validator::make($req->all(), [
-                'fnam1e' => 'required|string|max:255',
+                'fname' => 'required|string|max:255',
                 'lname' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email',
                 'password' => [
