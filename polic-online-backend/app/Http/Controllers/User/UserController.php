@@ -18,7 +18,7 @@ class UserController extends Controller {
         try {
             // Validate the request data
             $validator = Validator::make($req->all(), [
-                'fname' => 'required|string|max:255',
+                'fnam1e' => 'required|string|max:255',
                 'lname' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email',
                 'password' => [
@@ -37,7 +37,7 @@ class UserController extends Controller {
                     'status' => 'error',
                     'msg' => 'Ошибка проверки данных.',
                     'errors' => $validator->errors(),
-                ], 422);
+                ], 422)->getContent();
             }
     
             // Create a new user
@@ -61,7 +61,7 @@ class UserController extends Controller {
                 'status' => 'error',
                 'msg' => 'Произошла ошибка при обработке вашего запроса.',
                 'error' => $e->getMessage(),
-            ], 500);
+            ], 500)->getContent();
         }
     }
     /**
@@ -82,7 +82,7 @@ class UserController extends Controller {
                     'status' => 'error',
                     'msg' => 'Ошибка проверки данных.',
                     'errors' => $validator->errors(),
-                ], 422);
+                ], 422)->getContent();
             }
 
             // Attempt to authenticate the user
@@ -90,7 +90,7 @@ class UserController extends Controller {
                 return response()->json([
                     'status' => 'error',
                     'msg' => 'Неверные учетные данные.',
-                ], 401); // Unauthorized
+                ], 401)->getContent(); // Unauthorized
             }
 
             // Get the authenticated user
@@ -113,7 +113,7 @@ class UserController extends Controller {
                 'status' => 'error',
                 'msg' => 'Произошла ошибка при обработке вашего запроса.',
                 'error' => $e->getMessage(), // For debugging
-            ], 500); // Internal Server Error
+            ], 500)->getContent(); // Internal Server Error
         }
     }
     /**
